@@ -47,17 +47,20 @@ class ActivityForm extends Component {
   handleSubmit = () => {
     const { createActivity, editActivity, activity } = this.props;
     if (!activity) {
-      createActivity({
-        id: this.state.title,
-        ...this.state
-      });
+      createActivity({ ...this.state });
     } else {
       editActivity({ ...this.state });
     }
   };
 
   render() {
-    const { cancelFormOpen, activity, handleActivityDelete } = this.props;
+    const {
+      cancelFormOpen,
+      activity,
+      handleActivityDelete,
+      loading,
+      targetButton
+    } = this.props;
     const { title, description, category, date, city, venue } = this.state;
     return (
       <Segment clearing>
@@ -110,9 +113,11 @@ class ActivityForm extends Component {
           {activity && (
             <Button
               type='button'
+              name='delete'
               color='red'
               floated='left'
-              onClick={() => handleActivityDelete(activity.id)}
+              loading={targetButton === 'delete' && loading}
+              onClick={e => handleActivityDelete(e, activity.id)}
             >
               Delete
             </Button>
@@ -121,6 +126,7 @@ class ActivityForm extends Component {
             type='button'
             positive
             floated='right'
+            loading={!targetButton && loading}
             onClick={this.handleSubmit}
           >
             {activity ? 'Edit' : 'Create'}

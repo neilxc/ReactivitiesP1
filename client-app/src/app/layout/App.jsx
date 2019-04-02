@@ -1,24 +1,30 @@
 import React, { Component, Fragment } from 'react';
 import { Container } from 'semantic-ui-react';
-import data from '../api/activities.json';
 import NavBar from '../../features/nav/NavBar.jsx';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard.jsx';
-import {format} from 'date-fns';
+import { format } from 'date-fns';
+import agent from '../api/agent';
+import LoadingComponent from './LoadingComponent.jsx';
 
 class App extends Component {
   state = {
     activities: [],
     selectedActivity: null,
-    editMode: false
+    editMode: false,
+    loading: false,
+    targetButton: null
   };
 
   componentDidMount() {
-    data.forEach(activity => {
-      activity.date = format(activity.date, 'YYYY-MM-DDTHH:mm')
-    });
-    this.setState(({ activities }) => ({
-      activities: data
-    }));
+    this.setState({ loading: true });
+    agent.Activities.list()
+      .then(activities => {
+        activities.forEach(activity => {
+          activity.date = format(activity.date, 'YYYY-MM-DDTHH:mm');
+        });
+        this.setState({ activities });
+      })
+      .finally(() => this.setState({ loading: false }));
   }
 
   handleActivitySelect = id =>
@@ -36,65 +42,82 @@ class App extends Component {
     this.setState({
       editMode: true,
       selectedActivity: null
-    })
-  }
+    });
+  };
 
   handleCancelFormOpen = () => {
     this.setState({
       editMode: false
-    })
-  }
+    });
+  };
 
   handleActivityCreate = activity => {
-    this.setState(({activities}) => ({
-      activities: [...activities, activity],
-      editMode: false
-    }))
-  }
+    this.setState({ loading: true });
+    agent.Activities.create(activity)
+      .then(createdActivity => {
+        this.setState(({ activities }) => ({
+          activities: [...activities, createdActivity],
+          editMode: false
+        }));
+      })
+      .finally(() => this.setState({ loading: false }));
+  };
 
   handleActivityEdit = activity => {
-    this.setState(({activities})=> ({
-      activities: activities.map(a => {
-        if (a.id === activity.id) {
-          return {...activity}
-        } else {
-          return a
-        }
-      }),
-      editMode: false,
-      selectedActivity: activity
-    }))
-  }
+    this.setState({loading: true});
+    agent.Activities.update(activity)
+      .then(updatedActivity => {
+        this.setState(({ activities }) => ({
+          activities: activities.map(a => {
+            if (a.id === updatedActivity.id) {
+              return { ...updatedActivity };
+            } else {
+              return a;
+            }
+          }),
+          editMode: false,
+          selectedActivity: activity
+        }));
+      }).finally(() => this.setState({loading: false}))
+
+  };
 
   handleActivitySelectEdit = id => {
-    this.setState(({activities}) => ({
+    this.setState(({ activities }) => ({
       selectedActivity: activities.find(a => a.id === id),
       editMode: true
-    }))
-  }
+    }));
+  };
 
-  handleActivityDelete = (id) => {
-    this.setState(({activities}) => ({
-      activities: activities.filter(a => a.id !== id),
-      selectedActivity: null,
-      editMode: false
-    }))
-  }
+  handleActivityDelete = (e, id) => {
+    this.setState({loading: true, targetButton: e.target.name});
+    agent.Activities.delete(id)
+      .then(() => {
+        this.setState(({ activities }) => ({
+          activities: activities.filter(a => a.id !== id),
+          selectedActivity: null,
+          editMode: false
+        }));
+      }).finally(() => this.setState({loading: false, targetButton: null}))
+  };
 
   getActivitiesByDate(activities) {
-    return activities.sort(
-      (a, b) => Date.parse(a.date) - Date.parse(b.date)
-    )
+    return activities.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
   }
 
   render() {
-    const { activities, selectedActivity, editMode } = this.state;
+    const { activities, selectedActivity, editMode, loading, targetButton } = this.state;
     const activitiesByDate = this.getActivitiesByDate(activities);
+    if (loading && activities.length === 0)
+      return (
+        <LoadingComponent inverted={true} content='Loading Activities...' />
+      );
     return (
       <Fragment>
-        <NavBar createFormOpen={this.handleCreateFormOpen}/>
+        <NavBar createFormOpen={this.handleCreateFormOpen} />
         <Container style={{ marginTop: '7em' }}>
           <ActivityDashboard
+            loading={loading}
             activities={activitiesByDate}
             selectActivity={this.handleActivitySelect}
             selectedActivity={selectedActivity}
@@ -105,6 +128,7 @@ class App extends Component {
             editSelectedActivity={this.handleActivitySelectEdit}
             editActivity={this.handleActivityEdit}
             handleActivityDelete={this.handleActivityDelete}
+            targetButton={targetButton}
           />
         </Container>
       </Fragment>

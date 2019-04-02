@@ -14,11 +14,13 @@ export default ({
   createActivity,
   editSelectedActivity,
   editActivity,
-  handleActivityDelete
+  handleActivityDelete,
+  loading,
+  targetButton
 }) => (
   <Grid>
     <GridColumn width={10}>
-      <ActivityList activities={activities} selectActivity={selectActivity} />
+      <ActivityList activities={activities} selectActivity={selectActivity}/>
     </GridColumn>
     <GridColumn width={6}>
       {selectedActivity && !editMode && (
@@ -30,10 +32,12 @@ export default ({
       )}
       {editMode && (
         <ActivityForm
+          loading={loading}
           cancelFormOpen={cancelFormOpen}
           createActivity={createActivity}
           editActivity={editActivity}
           activity={selectedActivity}
+          targetButton={targetButton}
           handleActivityDelete={handleActivityDelete}
           key={selectedActivity ? selectedActivity.id : 0}
         />
