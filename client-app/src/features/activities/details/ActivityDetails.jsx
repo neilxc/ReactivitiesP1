@@ -1,10 +1,13 @@
 import React from 'react';
 import { Card, Image, ButtonGroup, Button } from 'semantic-ui-react';
+import { inject, observer } from 'mobx-react';
 
-export default ({
-  selectedActivity: activity,
-  cancelSelectedActivity,
-  editSelectedActivity
+export default inject('activityStore')(observer(({
+  activityStore: {
+    activity,
+    cancelSelectActivity,
+    editFormOpen
+  }
 }) => (
   <Card fluid>
     <Image src={`/assets/categoryImages/${activity.category}.jpg`} />
@@ -17,13 +20,13 @@ export default ({
     </Card.Content>
     <Card.Content extra>
       <ButtonGroup widths={2}>
-        <Button basic color='blue' onClick={() => editSelectedActivity(activity.id)}>
+        <Button basic color='blue' onClick={() => editFormOpen(activity.id)}>
           Edit
         </Button>
-        <Button basic color='grey' onClick={cancelSelectedActivity}>
+        <Button basic color='grey' onClick={cancelSelectActivity}>
           Cancel
         </Button>
       </ButtonGroup>
     </Card.Content>
   </Card>
-);
+)));

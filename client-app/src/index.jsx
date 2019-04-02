@@ -1,11 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import "semantic-ui-css/semantic.min.css";
+import { Provider } from 'mobx-react';
+import 'semantic-ui-css/semantic.min.css';
 import './app/layout/styles.css';
 import App from './app/layout/App';
 import * as serviceWorker from './serviceWorker';
+import activityStore from './app/stores/activityStore';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const stores = {
+  activityStore
+}
+
+ReactDOM.render(
+  <Provider {...stores}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

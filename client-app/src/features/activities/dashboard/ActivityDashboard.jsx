@@ -3,45 +3,18 @@ import { Grid, GridColumn } from 'semantic-ui-react';
 import ActivityList from './ActivityList';
 import ActivityDetails from '../details/ActivityDetails';
 import ActivityForm from '../form/ActivityForm';
+import { inject, observer } from 'mobx-react';
 
-export default ({
-  activities,
-  selectActivity,
-  selectedActivity,
-  cancelSelectedActivity,
-  editMode,
-  cancelFormOpen,
-  createActivity,
-  editSelectedActivity,
-  editActivity,
-  handleActivityDelete,
-  loading,
-  targetButton
-}) => (
-  <Grid>
-    <GridColumn width={10}>
-      <ActivityList activities={activities} selectActivity={selectActivity}/>
-    </GridColumn>
-    <GridColumn width={6}>
-      {selectedActivity && !editMode && (
-        <ActivityDetails
-          selectedActivity={selectedActivity}
-          cancelSelectedActivity={cancelSelectedActivity}
-          editSelectedActivity={editSelectedActivity}
-        />
-      )}
-      {editMode && (
-        <ActivityForm
-          loading={loading}
-          cancelFormOpen={cancelFormOpen}
-          createActivity={createActivity}
-          editActivity={editActivity}
-          activity={selectedActivity}
-          targetButton={targetButton}
-          handleActivityDelete={handleActivityDelete}
-          key={selectedActivity ? selectedActivity.id : 0}
-        />
-      )}
-    </GridColumn>
-  </Grid>
+export default inject('activityStore')(
+  observer(({ activityStore: { activity, editMode } }) => (
+    <Grid>
+      <GridColumn width={10}>
+        <ActivityList />
+      </GridColumn>
+      <GridColumn width={6}>
+        {activity && !editMode && <ActivityDetails />}
+        {editMode && <ActivityForm key={activity ? activity.id : 0} />}
+      </GridColumn>
+    </Grid>
+  ))
 );

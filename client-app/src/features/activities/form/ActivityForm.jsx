@@ -7,6 +7,7 @@ import {
   Segment,
   FormSelect
 } from 'semantic-ui-react';
+import { inject, observer } from 'mobx-react';
 
 const categories = [
   { key: 'drinks', text: 'Drinks', value: 'Drinks' },
@@ -17,6 +18,8 @@ const categories = [
   { key: 'travel', text: 'Travel', value: 'Travel' }
 ];
 
+@inject('activityStore')
+@observer
 class ActivityForm extends Component {
   state = this.getInitialState();
 
@@ -45,7 +48,7 @@ class ActivityForm extends Component {
   };
 
   handleSubmit = () => {
-    const { createActivity, editActivity, activity } = this.props;
+    const { activityStore: {createActivity, editActivity, activity}} = this.props;
     if (!activity) {
       createActivity({ ...this.state });
     } else {
@@ -55,11 +58,13 @@ class ActivityForm extends Component {
 
   render() {
     const {
-      cancelFormOpen,
-      activity,
-      handleActivityDelete,
-      loading,
-      targetButton
+      activityStore: {
+        cancelFormOpen,
+        deleteActivity,
+        activity,
+        loading,
+        targetButton
+      },
     } = this.props;
     const { title, description, category, date, city, venue } = this.state;
     return (
@@ -117,7 +122,7 @@ class ActivityForm extends Component {
               color='red'
               floated='left'
               loading={targetButton === 'delete' && loading}
-              onClick={e => handleActivityDelete(e, activity.id)}
+              onClick={e => deleteActivity(e, activity.id)}
             >
               Delete
             </Button>
