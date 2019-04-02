@@ -9,21 +9,35 @@ export default ({
   selectActivity,
   selectedActivity,
   cancelSelectedActivity,
-  editMode
+  editMode,
+  cancelFormOpen,
+  createActivity,
+  editSelectedActivity,
+  editActivity,
+  handleActivityDelete
 }) => (
   <Grid>
     <GridColumn width={10}>
       <ActivityList activities={activities} selectActivity={selectActivity} />
     </GridColumn>
     <GridColumn width={6}>
-      {selectedActivity && (
+      {selectedActivity && !editMode && (
         <ActivityDetails
           selectedActivity={selectedActivity}
           cancelSelectedActivity={cancelSelectedActivity}
+          editSelectedActivity={editSelectedActivity}
         />
       )}
-      {editMode &&
-      <ActivityForm />}
+      {editMode && (
+        <ActivityForm
+          cancelFormOpen={cancelFormOpen}
+          createActivity={createActivity}
+          editActivity={editActivity}
+          activity={selectedActivity}
+          handleActivityDelete={handleActivityDelete}
+          key={selectedActivity ? selectedActivity.id : 0}
+        />
+      )}
     </GridColumn>
   </Grid>
 );
