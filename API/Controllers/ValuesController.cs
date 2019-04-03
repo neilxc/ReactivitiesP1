@@ -33,6 +33,10 @@ namespace API.Controllers
         public async Task<IActionResult> Get(int id)
         {
             var value = await _context.Values.SingleOrDefaultAsync(x => x.Id == id);
+            
+            if (value == null)
+                return NotFound();
+
             return Ok(value);
         }
 
