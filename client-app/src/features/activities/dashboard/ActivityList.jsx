@@ -1,38 +1,22 @@
-import React from 'react';
-import { Item, Button, Label, Segment } from 'semantic-ui-react';
+import React, { Fragment } from 'react';
+import { Header } from 'semantic-ui-react';
 import { inject, observer } from 'mobx-react';
-import {Link} from 'react-router-dom';
+import ActivityListItem from './ActivityListItem';
+import { format } from 'date-fns';
 
 export default inject('activityStore')(
-  observer(
-    ({ activityStore: { activitiesByDate: activities } }) => (
-      <Segment>
-        <Item.Group divided>
+  observer(({ activityStore: { activitiesByDate: activities } }) => (
+    <Fragment>
+      {activities.map(([group, activities]) => (
+        <Fragment key={group}>
+          <Header sub color={'teal'}>
+            {format(group, 'dddd Do MMMM')}
+          </Header>
           {activities.map(activity => (
-            <Item key={activity.id}>
-              <Item.Content>
-                <Item.Header as='a'>{activity.title}</Item.Header>
-                <Item.Meta>{activity.date}</Item.Meta>
-                <Item.Description>
-                  <div>{activity.description}</div>
-                  <div>
-                    {activity.city} - {activity.venue}
-                  </div>
-                </Item.Description>
-                <Item.Extra>
-                  <Button
-                    floated='right'
-                    content='View'
-                    color='blue'
-                    as={Link} to={`/activities/${activity.id}`}
-                  />
-                  <Label basic>{activity.category}</Label>
-                </Item.Extra>
-              </Item.Content>
-            </Item>
+            <ActivityListItem key={activity.id} activity={activity} />
           ))}
-        </Item.Group>
-      </Segment>
-    )
-  )
+        </Fragment>
+      ))}
+    </Fragment>
+  ))
 );

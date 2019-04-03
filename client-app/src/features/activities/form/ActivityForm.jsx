@@ -5,7 +5,9 @@ import {
   FormTextArea,
   Button,
   Segment,
-  FormSelect
+  FormSelect,
+  Grid,
+  GridColumn
 } from 'semantic-ui-react';
 import { inject, observer } from 'mobx-react';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
@@ -32,11 +34,11 @@ class ActivityForm extends Component {
       date: '',
       city: '',
       venue: ''
-    }
+    };
   }
 
   componentWillMount() {
-    this.setState(this.initializeState())
+    this.setState(this.initializeState());
   }
 
   componentDidMount() {
@@ -49,7 +51,7 @@ class ActivityForm extends Component {
   }
 
   componentDidUpdate(oldProps) {
-    const {location} = this.props;
+    const { location } = this.props;
     if (location.key !== oldProps.location.key) {
       this.setState(this.initializeState());
     }
@@ -78,95 +80,107 @@ class ActivityForm extends Component {
   render() {
     const {
       activityStore: {
-        cancelFormOpen,
         deleteActivity,
         activity,
         loading,
-        targetButton
-      }
+        targetButton,
+        submitting
+      },
+      history
     } = this.props;
     const { title, description, category, date, city, venue } = this.state;
-    if (loading) return <LoadingComponent inverted={true} content={'Loading activity...'} />
+    if (loading)
+      return (
+        <LoadingComponent inverted={true} content={'Loading activity...'} />
+      );
     return (
-      <Segment clearing>
-        <Form autoComplete='off'>
-          <FormInput
-            name='title'
-            label='Title'
-            placeholder='Title'
-            value={title}
-            onChange={this.handleChange('title')}
-          />
-          <FormTextArea
-            name='description'
-            rows={2}
-            label='Description'
-            placeholder='Description'
-            value={description}
-            onChange={this.handleChange('description')}
-          />
-          <FormSelect
-            name='category'
-            label='Category'
-            placeholder='Category'
-            options={categories}
-            value={category}
-            onChange={(e, data) => this.handleSelectChange(e, data)}
-          />
-          <FormInput
-            name='date'
-            type='datetime-local'
-            label='Date'
-            placeholder='Date'
-            value={date}
-            onChange={this.handleChange('date')}
-          />
-          <FormInput
-            name='city'
-            label='City'
-            placeholder='City'
-            value={city}
-            onChange={this.handleChange('city')}
-          />
-          <FormInput
-            name='venue'
-            label='Venue'
-            placeholder='Venue'
-            value={venue}
-            onChange={this.handleChange('venue')}
-          />
-          {activity && (
-            <Button
-              type='button'
-              name='delete'
-              color='red'
-              floated='left'
-              loading={targetButton === 'delete' && loading}
-              onClick={e => deleteActivity(e, activity.id)}
-            >
-              Delete
-            </Button>
-          )}
-          <Button
-            type='button'
-            positive
-            floated='right'
-            loading={!targetButton && loading}
-            onClick={this.handleSubmit}
-          >
-            {activity ? 'Edit' : 'Create'}
-          </Button>
+      <Grid>
+        <GridColumn width={10}>
+          <Segment clearing>
+            <Form autoComplete='off'>
+              <FormInput
+                name='title'
+                label='Title'
+                placeholder='Title'
+                value={title}
+                onChange={this.handleChange('title')}
+              />
+              <FormTextArea
+                name='description'
+                rows={2}
+                label='Description'
+                placeholder='Description'
+                value={description}
+                onChange={this.handleChange('description')}
+              />
+              <FormSelect
+                name='category'
+                label='Category'
+                placeholder='Category'
+                options={categories}
+                value={category}
+                onChange={(e, data) => this.handleSelectChange(e, data)}
+              />
+              <FormInput
+                name='date'
+                type='datetime-local'
+                label='Date'
+                placeholder='Date'
+                value={date}
+                onChange={this.handleChange('date')}
+              />
+              <FormInput
+                name='city'
+                label='City'
+                placeholder='City'
+                value={city}
+                onChange={this.handleChange('city')}
+              />
+              <FormInput
+                name='venue'
+                label='Venue'
+                placeholder='Venue'
+                value={venue}
+                onChange={this.handleChange('venue')}
+              />
+              {activity && (
+                <Button
+                  type='button'
+                  name='delete'
+                  color='red'
+                  floated='left'
+                  loading={targetButton === 'delete' && submitting}
+                  onClick={e => deleteActivity(e, activity.id)}
+                >
+                  Delete
+                </Button>
+              )}
+              <Button
+                type='button'
+                positive
+                floated='right'
+                loading={!targetButton && submitting}
+                onClick={this.handleSubmit}
+              >
+                {activity ? 'Edit' : 'Create'}
+              </Button>
 
-          <Button
-            type='button'
-            color='grey'
-            floated='right'
-            onClick={cancelFormOpen}
-          >
-            Cancel
-          </Button>
-        </Form>
-      </Segment>
+              <Button
+                type='button'
+                color='grey'
+                floated='right'
+                onClick={
+                  activity
+                    ? () => history.push(`/activities/${activity.id}`)
+                    : () => history.push(`/activities`)
+                }
+              >
+                Cancel
+              </Button>
+            </Form>
+          </Segment>
+        </GridColumn>
+      </Grid>
     );
   }
 }

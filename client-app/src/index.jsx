@@ -1,22 +1,30 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {createBrowserHistory} from 'history';
 import { Provider } from 'mobx-react';
-import { BrowserRouter } from 'react-router-dom';
+import { Router } from 'react-router-dom';
+import { RouterStore, syncHistoryWithStore } from 'mobx-react-router';
 import 'semantic-ui-css/semantic.min.css';
 import './app/layout/styles.css';
 import App from './app/layout/App';
 import * as serviceWorker from './serviceWorker';
 import activityStore from './app/stores/activityStore';
 
+const browserHistory = createBrowserHistory();
+export const routingStore = new RouterStore()
+
 const stores = {
-  activityStore
+  activityStore,
+  router: routingStore
 };
+
+const history = syncHistoryWithStore(browserHistory, routingStore);
 
 ReactDOM.render(
   <Provider {...stores}>
-    <BrowserRouter>
+    <Router history={history}>
       <App />
-    </BrowserRouter>
+    </Router>
   </Provider>,
   document.getElementById('root')
 );
