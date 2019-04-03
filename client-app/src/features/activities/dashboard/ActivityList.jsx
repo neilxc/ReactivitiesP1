@@ -1,10 +1,11 @@
 import React from 'react';
 import { Item, Button, Label, Segment } from 'semantic-ui-react';
 import { inject, observer } from 'mobx-react';
+import {Link} from 'react-router-dom';
 
 export default inject('activityStore')(
   observer(
-    ({ activityStore: { activitiesByDate: activities, selectActivity } }) => (
+    ({ activityStore: { activitiesByDate: activities } }) => (
       <Segment>
         <Item.Group divided>
           {activities.map(activity => (
@@ -23,7 +24,7 @@ export default inject('activityStore')(
                     floated='right'
                     content='View'
                     color='blue'
-                    onClick={() => selectActivity(activity.id)}
+                    as={Link} to={`/activities/${activity.id}`}
                   />
                   <Label basic>{activity.category}</Label>
                 </Item.Extra>

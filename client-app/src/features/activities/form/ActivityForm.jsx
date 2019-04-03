@@ -8,6 +8,7 @@ import {
   FormSelect
 } from 'semantic-ui-react';
 import { inject, observer } from 'mobx-react';
+import LoadingComponent from '../../../app/layout/LoadingComponent';
 
 const categories = [
   { key: 'drinks', text: 'Drinks', value: 'Drinks' },
@@ -21,21 +22,37 @@ const categories = [
 @inject('activityStore')
 @observer
 class ActivityForm extends Component {
-  state = this.getInitialState();
+  state = {};
 
-  getInitialState() {
-    const { activity } = this.props;
+  initializeState() {
+    return {
+      title: '',
+      description: '',
+      category: '',
+      date: '',
+      city: '',
+      venue: ''
+    }
+  }
 
-    return activity
-      ? activity
-      : {
-          title: '',
-          description: '',
-          category: '',
-          date: '',
-          city: '',
-          venue: ''
-        };
+  componentWillMount() {
+    this.setState(this.initializeState())
+  }
+
+  componentDidMount() {
+    const { match, activityStore } = this.props;
+    if (Object.keys(match.params).length !== 0) {
+      activityStore.loadActivity(+match.params.id, true).then(activity => {
+        this.setState({ ...activityStore.activity });
+      });
+    }
+  }
+
+  componentDidUpdate(oldProps) {
+    const {location} = this.props;
+    if (location.key !== oldProps.location.key) {
+      this.setState(this.initializeState());
+    }
   }
 
   handleChange = name => ({ target: { value } }) =>
@@ -48,7 +65,9 @@ class ActivityForm extends Component {
   };
 
   handleSubmit = () => {
-    const { activityStore: {createActivity, editActivity, activity}} = this.props;
+    const {
+      activityStore: { createActivity, editActivity, activity }
+    } = this.props;
     if (!activity) {
       createActivity({ ...this.state });
     } else {
@@ -64,9 +83,10 @@ class ActivityForm extends Component {
         activity,
         loading,
         targetButton
-      },
+      }
     } = this.props;
     const { title, description, category, date, city, venue } = this.state;
+    if (loading) return <LoadingComponent inverted={true} content={'Loading activity...'} />
     return (
       <Segment clearing>
         <Form autoComplete='off'>

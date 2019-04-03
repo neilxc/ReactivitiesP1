@@ -6,11 +6,12 @@ class ActivityStore {
   @observable activityRegistry = new Map();
   @observable activity = null;
   @observable editMode = false;
+  @observable loadingInitial = false;
   @observable loading = false;
   @observable targetButton = null;
 
   @action loadActivities() {
-    this.loading = true;
+    this.loadingInitial = true;
     agent.Activities.list()
       .then(activities => {
         activities.forEach(activity => {
@@ -18,7 +19,29 @@ class ActivityStore {
           this.activityRegistry.set(activity.id, activity);
         });
       })
+      .finally(() => (this.loadingInitial = false));
+  }
+
+  @action loadActivity = (id, acceptCached) => {
+    if (acceptCached) {
+      const activity = this.getActivity(id);
+      if (activity) {
+        this.activity = activity;
+        return Promise.resolve(activity);
+      }
+    }
+    this.loading = true;
+    return agent.Activities.get(id)
+      .then(activity => {
+        activity.date = format(activity.date, 'YYYY-MM-DDTHH:mm');
+        this.activityRegistry.set(activity.id, activity);
+        this.activity = activity;
+      })
       .finally(() => (this.loading = false));
+  };
+
+  getActivity(id) {
+    return this.activityRegistry.get(id);
   }
 
   @action selectActivity = id => {
