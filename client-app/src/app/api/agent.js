@@ -1,6 +1,24 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import {routingStore as router} from '../../index';
 
 axios.defaults.baseURL = 'https://localhost:5001/api';
+
+axios.interceptors.response.use(undefined, (error) => {
+    if (error.response.status === 404) {
+        toast.error('Resource could not be found');
+        router.push('/activities');
+        return Promise.reject(error.response);
+    }
+    if (error.response.status === 400) {
+        throw error.response;
+    }
+    if (error.response.status === 500) {
+        toast.error(error.response.data.errors || 'Internal Server Error');
+        return Promise.reject(error.response);
+    }
+    return Promise.reject(error.response);
+})
 
 const responseBody = res => res.data;
 

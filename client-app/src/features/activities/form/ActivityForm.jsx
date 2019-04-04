@@ -68,7 +68,7 @@ class ActivityForm extends Component {
         <MobxReactFormDevTools.UI />
         <GridColumn width={10}>
           <Segment clearing>
-            <Form autoComplete='off' error={!!form.error}>
+            <Form autoComplete='off' >
               <TextInput field={form.$('title')} />
               <TextAreaInput field={form.$('description')} rows={2} />
               <SelectInput field={form.$('category')} />

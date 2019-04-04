@@ -6,6 +6,7 @@ import { Router } from 'react-router-dom';
 import { RouterStore, syncHistoryWithStore } from 'mobx-react-router';
 import 'semantic-ui-css/semantic.min.css';
 import 'react-widgets/dist/css/react-widgets.css';
+import 'react-toastify/dist/ReactToastify.min.css';
 import './app/layout/styles.css';
 import App from './app/layout/App';
 import * as serviceWorker from './serviceWorker';

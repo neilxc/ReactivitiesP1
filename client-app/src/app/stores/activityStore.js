@@ -1,6 +1,7 @@
 import { observable, action, computed } from 'mobx';
 import { routingStore as router } from '../../index';
 import agent from '../api/agent';
+import { toast } from 'react-toastify';
 
 class ActivityStore {
   @observable activityRegistry = new Map();
@@ -47,12 +48,13 @@ class ActivityStore {
 
   @action createActivity = activity => {
     this.submitting = true;
-    agent.Activities.create(activity)
+    return agent.Activities.create(activity)
       .then(createdActivity => {
         this.activityRegistry.set(createdActivity.id, createdActivity);
         this.editMode = false;
       })
       .then(() => router.push('/activities'))
+      .catch((err) => toast.error(err.data.title ? err.data.title : 'Server error'))
       .finally(() => (this.submitting = false));
   };
 
@@ -65,6 +67,7 @@ class ActivityStore {
         this.editMode = false;
       })
       .then(() => router.push(`/activities/${activity.id}`))
+      .catch((err) => toast.error(err.data.title ? err.data.title : 'Server error'))
       .finally(() => (this.submitting = false));
   };
 
