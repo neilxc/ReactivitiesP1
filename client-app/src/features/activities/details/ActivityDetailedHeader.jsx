@@ -45,7 +45,7 @@ const ActivityDetailsHeader = ({ activity }) => (
               />
               <p>
                 {activity.date &&
-                  format(activity.date, "dddd do MMMM")}
+                  format(activity.date, "EEEE do MMMM")}
               </p>
               <p>
                 Hosted by <strong>Bob</strong>

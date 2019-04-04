@@ -1,81 +1,52 @@
 import React, { Component } from 'react';
+import MobxReactForm from 'mobx-react-form';
+import MobxReactFormDevTools from 'mobx-react-form-devtools';
+import activityFormSetup from '../../../app/forms/setup/activityFormSetup';
 import {
   Form,
-  FormInput,
-  FormTextArea,
   Button,
   Segment,
-  FormSelect,
   Grid,
-  GridColumn
+  GridColumn,
+  FormGroup
 } from 'semantic-ui-react';
 import { inject, observer } from 'mobx-react';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
+import TextInput from '../../../app/forms/inputs/TextInput';
+import TextAreaInput from '../../../app/forms/inputs/TextAreaInput';
+import SelectInput from '../../../app/forms/inputs/SelectInput';
+import DateInput from '../../../app/forms/inputs/DateInput';
+import FormSubmitButton from '../../../app/forms/controls/FormSubmitButton';
 
-const categories = [
-  { key: 'drinks', text: 'Drinks', value: 'Drinks' },
-  { key: 'culture', text: 'Culture', value: 'Culture' },
-  { key: 'film', text: 'Film', value: 'Film' },
-  { key: 'food', text: 'Food', value: 'Food' },
-  { key: 'music', text: 'Music', value: 'Music' },
-  { key: 'travel', text: 'Travel', value: 'Travel' }
-];
+const form = new MobxReactForm(
+  { ...activityFormSetup.fields },
+  { ...activityFormSetup.hooks }
+);
+
+MobxReactFormDevTools.register({ form });
 
 @inject('activityStore')
 @observer
 class ActivityForm extends Component {
-  state = {};
-
-  initializeState() {
-    return {
-      title: '',
-      description: '',
-      category: '',
-      date: '',
-      city: '',
-      venue: ''
-    };
-  }
-
-  componentWillMount() {
-    this.setState(this.initializeState());
-  }
-
   componentDidMount() {
     const { match, activityStore } = this.props;
     if (Object.keys(match.params).length !== 0) {
+      console.log('trying to load activity');
       activityStore.loadActivity(+match.params.id, true).then(activity => {
-        this.setState({ ...activityStore.activity });
+        activity.time = activity.date;
+        form.init({ ...activity });
       });
+    } else {
+      form.clear();
     }
   }
 
   componentDidUpdate(oldProps) {
     const { location } = this.props;
     if (location.key !== oldProps.location.key) {
-      this.setState(this.initializeState());
+      form.clear();
     }
   }
-
-  handleChange = name => ({ target: { value } }) =>
-    this.setState({ [name]: value });
-
-  handleSelectChange = (e, data) => {
-    this.setState({
-      category: data.value
-    });
-  };
-
-  handleSubmit = () => {
-    const {
-      activityStore: { createActivity, editActivity, activity }
-    } = this.props;
-    if (!activity) {
-      createActivity({ ...this.state });
-    } else {
-      editActivity({ ...this.state });
-    }
-  };
 
   render() {
     const {
@@ -88,61 +59,25 @@ class ActivityForm extends Component {
       },
       history
     } = this.props;
-    const { title, description, category, date, city, venue } = this.state;
     if (loading)
       return (
         <LoadingComponent inverted={true} content={'Loading activity...'} />
       );
     return (
       <Grid>
+        <MobxReactFormDevTools.UI />
         <GridColumn width={10}>
           <Segment clearing>
-            <Form autoComplete='off'>
-              <FormInput
-                name='title'
-                label='Title'
-                placeholder='Title'
-                value={title}
-                onChange={this.handleChange('title')}
-              />
-              <FormTextArea
-                name='description'
-                rows={2}
-                label='Description'
-                placeholder='Description'
-                value={description}
-                onChange={this.handleChange('description')}
-              />
-              <FormSelect
-                name='category'
-                label='Category'
-                placeholder='Category'
-                options={categories}
-                value={category}
-                onChange={(e, data) => this.handleSelectChange(e, data)}
-              />
-              <FormInput
-                name='date'
-                type='datetime-local'
-                label='Date'
-                placeholder='Date'
-                value={date}
-                onChange={this.handleChange('date')}
-              />
-              <FormInput
-                name='city'
-                label='City'
-                placeholder='City'
-                value={city}
-                onChange={this.handleChange('city')}
-              />
-              <FormInput
-                name='venue'
-                label='Venue'
-                placeholder='Venue'
-                value={venue}
-                onChange={this.handleChange('venue')}
-              />
+            <Form autoComplete='off' error={!!form.error}>
+              <TextInput field={form.$('title')} />
+              <TextAreaInput field={form.$('description')} rows={2} />
+              <SelectInput field={form.$('category')} />
+              <FormGroup widths='equal'>
+                <DateInput field={form.$('date')} date={true} />
+                <DateInput field={form.$('time')} time={true} />
+              </FormGroup>
+              <TextInput field={form.$('city')} />
+              <TextInput field={form.$('venue')} />
               {activity && (
                 <Button
                   type='button'
@@ -155,15 +90,14 @@ class ActivityForm extends Component {
                   Delete
                 </Button>
               )}
-              <Button
-                type='button'
-                positive
+              <FormSubmitButton
+                form={form}
                 floated='right'
-                loading={!targetButton && submitting}
-                onClick={this.handleSubmit}
+                loading={submitting}
+                positive={true}
               >
-                {activity ? 'Edit' : 'Create'}
-              </Button>
+                {form.has('id') ? 'Edit' : 'Create'}
+              </FormSubmitButton>
 
               <Button
                 type='button'

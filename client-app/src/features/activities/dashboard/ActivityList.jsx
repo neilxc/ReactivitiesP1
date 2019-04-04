@@ -10,7 +10,7 @@ export default inject('activityStore')(
       {activities.map(([group, activities]) => (
         <Fragment key={group}>
           <Header sub color={'teal'}>
-            {format(group, 'dddd Do MMMM')}
+            {format(group, 'EEEE do MMMM')}
           </Header>
           {activities.map(activity => (
             <ActivityListItem key={activity.id} activity={activity} />

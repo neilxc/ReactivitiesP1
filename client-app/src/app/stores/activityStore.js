@@ -1,5 +1,4 @@
 import { observable, action, computed } from 'mobx';
-import { format } from 'date-fns';
 import { routingStore as router } from '../../index';
 import agent from '../api/agent';
 
@@ -16,7 +15,7 @@ class ActivityStore {
     agent.Activities.list()
       .then(activities => {
         activities.forEach(activity => {
-          activity.date = format(activity.date, 'YYYY-MM-DDTHH:mm');
+          activity.date = new Date(activity.date);
           this.activityRegistry.set(activity.id, activity);
         });
       })
@@ -34,9 +33,10 @@ class ActivityStore {
     this.loading = true;
     return agent.Activities.get(id)
       .then(activity => {
-        activity.date = format(activity.date, 'YYYY-MM-DDTHH:mm');
+        activity.date = new Date(activity.date);;
         this.activityRegistry.set(activity.id, activity);
         this.activity = activity;
+        return Promise.resolve(activity);
       })
       .finally(() => (this.loading = false));
   };
@@ -91,7 +91,7 @@ class ActivityStore {
     );
     return Object.entries(
       sortedActivities.reduce((activities, activity) => {
-        const date = activity.date.split('T')[0];
+        const date = activity.date.toISOString().split('T')[0];
         activities[date] = activities[date]
           ? [...activities[date], activity]
           : [activity];

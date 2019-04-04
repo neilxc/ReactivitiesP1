@@ -27,7 +27,7 @@ const ActivityDetailsInfo = ({ activity }) => (
         </Grid.Column>
         <Grid.Column width={15}>
           <span>
-            {format(activity.date, 'dddd do MMMM')} at{' '}
+            {format(activity.date, 'EEEE do MMMM')} at{' '}
             {format(activity.date, 'h:mm a')}
           </span>
         </Grid.Column>
