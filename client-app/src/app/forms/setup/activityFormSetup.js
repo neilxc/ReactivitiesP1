@@ -28,7 +28,7 @@ const fields = {
     category: categories
   },
   rules: {
-    title: 'required|between:4,10',
+    title: 'required',
     description: 'required',
     category: 'required',
     date: 'required',

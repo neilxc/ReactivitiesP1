@@ -50,6 +50,7 @@ class ActivityStore {
     this.submitting = true;
     return agent.Activities.create(activity)
       .then(createdActivity => {
+        createdActivity.date = new Date(createdActivity.date);
         this.activityRegistry.set(createdActivity.id, createdActivity);
         this.editMode = false;
       })
@@ -62,6 +63,7 @@ class ActivityStore {
     this.submitting = true;
     agent.Activities.update(activity)
       .then(updatedActivity => {
+        updatedActivity.date = new Date(updatedActivity.date);
         this.activityRegistry.set(updatedActivity.id, updatedActivity);
         this.activity = updatedActivity;
         this.editMode = false;

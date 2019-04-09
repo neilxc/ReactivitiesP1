@@ -1,8 +1,16 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import {routingStore as router} from '../../index';
+import commonStore from '../stores/commonStore';
 
 axios.defaults.baseURL = 'https://localhost:5001/api';
+
+axios.interceptors.request.use((config) => {
+    if (commonStore.token) config.headers.Authorization = `Bearer ${commonStore.token}`;
+    return config;
+}, error => {
+    return Promise.reject(error);
+})
 
 axios.interceptors.response.use(undefined, (error) => {
     if (error.response.status === 404) {
@@ -39,6 +47,14 @@ const Activities = {
     delete: id => requests.del(`/activities/${id}`)
 }
 
+const User = {
+    current: () => requests.get(`/user`),
+    login: (email, password) => requests.post(`/user/login`, {email, password}),
+    register: (values) =>
+        requests.post(`/user/register`, values)
+}
+
 export default {
-    Activities
+    Activities,
+    User
 }

@@ -4,13 +4,15 @@ import { createBrowserHistory } from 'history';
 import { Provider } from 'mobx-react';
 import { Router } from 'react-router-dom';
 import { RouterStore, syncHistoryWithStore } from 'mobx-react-router';
-import 'semantic-ui-css/semantic.min.css';
 import 'react-widgets/dist/css/react-widgets.css';
 import 'react-toastify/dist/ReactToastify.min.css';
 import './app/layout/styles.css';
 import App from './app/layout/App';
 import * as serviceWorker from './serviceWorker';
 import activityStore from './app/stores/activityStore';
+import userStore from './app/stores/userStore';
+import commonStore from './app/stores/commonStore';
+import modalStore from './app/stores/modalStore';
 import dateFnsLocalizer from 'react-widgets-date-fns';
 
 dateFnsLocalizer()
@@ -20,7 +22,10 @@ export const routingStore = new RouterStore();
 
 const stores = {
   activityStore,
-  router: routingStore
+  router: routingStore,
+  userStore,
+  commonStore,
+  modalStore
 };
 
 const history = syncHistoryWithStore(browserHistory, routingStore);

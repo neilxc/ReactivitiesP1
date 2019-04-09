@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import MobxReactForm from 'mobx-react-form';
 import MobxReactFormDevTools from 'mobx-react-form-devtools';
-import activityFormSetup from '../../../app/forms/setup/activityFormSetup';
+import forms from '../../../app/forms/forms';
 import {
   Form,
   Button,
@@ -18,10 +17,7 @@ import SelectInput from '../../../app/forms/inputs/SelectInput';
 import DateInput from '../../../app/forms/inputs/DateInput';
 import FormSubmitButton from '../../../app/forms/controls/FormSubmitButton';
 
-const form = new MobxReactForm(
-  { ...activityFormSetup.fields },
-  { ...activityFormSetup.hooks }
-);
+const form = forms.activityForm;
 
 MobxReactFormDevTools.register({ form });
 
