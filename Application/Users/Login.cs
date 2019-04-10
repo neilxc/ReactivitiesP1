@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,13 +57,12 @@ namespace Application.Users
                 
                 if (result.Succeeded)
                 {
-                    // TODO: generate a token and return
                     return new User
                     {
                         DisplayName = user.DisplayName,
                         Token = _jwtGenerator.CreateToken(user),
                         Username = user.UserName,
-                        Image = null
+                        Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
                     };
                 }
 
