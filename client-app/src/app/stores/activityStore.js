@@ -1,7 +1,9 @@
 import { observable, action, computed } from 'mobx';
 import { routingStore as router } from '../../index';
+import userStore from './userStore';
 import agent from '../api/agent';
 import { toast } from 'react-toastify';
+import { setActivityProps } from '../common/util/util';
 
 class ActivityStore {
   @observable activityRegistry = new Map();
@@ -16,7 +18,7 @@ class ActivityStore {
     agent.Activities.list()
       .then(activities => {
         activities.forEach(activity => {
-          activity.date = new Date(activity.date);
+          setActivityProps(activity, userStore.user);
           this.activityRegistry.set(activity.id, activity);
         });
       })
@@ -31,15 +33,15 @@ class ActivityStore {
         return Promise.resolve(activity);
       }
     }
-    this.loading = true;
+    this.loadingInitial = true;
     return agent.Activities.get(id)
       .then(activity => {
-        activity.date = new Date(activity.date);;
+        setActivityProps(activity, userStore.user);
         this.activityRegistry.set(activity.id, activity);
         this.activity = activity;
         return Promise.resolve(activity);
       })
-      .finally(() => (this.loading = false));
+      .finally(() => (this.loadingInitial = false));
   };
 
   getActivity(id) {
@@ -85,6 +87,46 @@ class ActivityStore {
       .then(() => router.push('/activities'))
       .finally(() => (this.submitting = false));
   };
+
+  @action attendActivity = () => {
+    const attendee = {
+      displayName: userStore.user.displayName,
+      username: userStore.user.username,
+      isHost: false,
+      image: userStore.user.image
+    }
+    this.loading = true;
+    agent.Activities.attend(this.activity.id)
+      .then(() => {
+        this.activity.attendees.push(attendee);
+        this.activity.isGoing = true;
+        this.activityRegistry.set(this.activity.id, this.activity);
+      })
+      .catch(err => {
+        toast.error("problem adding attendance");
+      })
+      .finally(() => {
+        this.loading = false;
+      })
+  }
+
+  @action cancelAttendance = () => {
+    const username = userStore.user.username;
+    this.loading = true;
+    agent.Activities.unattend(this.activity.id)
+      .then(() => {
+        this.activity.attendees = this.activity.attendees.filter(a => a.username !== username);
+        this.activity.isGoing = false;
+        this.activityRegistry.set(this.activity.id, this.activity);
+      })
+      .catch(err => {
+        toast.error("problem removing attendance");
+      })
+      .finally(() => {
+        this.loading = false;
+      })
+
+  }
 
   @computed get activitiesByDate() {
     return this.groupActivitiesByDate(Array.from(this.activityRegistry.values()));

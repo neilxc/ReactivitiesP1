@@ -11,6 +11,7 @@ import {
   Image,
   Item
 } from "semantic-ui-react";
+import { observer } from "mobx-react";
 
 const eventImageStyle = {
   filter: "brightness(30%)"
@@ -25,7 +26,7 @@ const eventImageTextStyle = {
   color: "white"
 };
 
-const ActivityDetailsHeader = ({ activity }) => (
+const ActivityDetailsHeader = ({ activity, attendActivity, cancelAttendance, loading }) => (
   <SegmentGroup>
     <Segment basic attached="top" style={{ padding: "0" }}>
       <Image
@@ -56,8 +57,11 @@ const ActivityDetailsHeader = ({ activity }) => (
       </Segment>
     </Segment>
     <Segment clearing attached="bottom">
-      <Button color="teal">Join Activity</Button>
-      <Button>Cancel attendance</Button>
+      {!activity.isGoing &&
+      <Button onClick={attendActivity} color="teal" loading={loading}>Join Activity</Button>}
+      {activity.isGoing && !activity.isHost &&
+      <Button onClick={cancelAttendance} loading={loading}>Cancel attendance</Button>}
+      {activity.isHost &&
       <Button
         as={Link}
         to={`/manage/${activity.id}`}
@@ -65,9 +69,9 @@ const ActivityDetailsHeader = ({ activity }) => (
         floated="right"
       >
         Manage Event
-      </Button>
+      </Button>}
     </Segment>
   </SegmentGroup>
 );
 
-export default ActivityDetailsHeader;
+export default observer(ActivityDetailsHeader);

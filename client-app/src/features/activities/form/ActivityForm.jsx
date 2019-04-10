@@ -29,8 +29,9 @@ class ActivityForm extends Component {
     if (Object.keys(match.params).length !== 0) {
       console.log('trying to load activity');
       activityStore.loadActivity(+match.params.id, true).then(activity => {
-        activity.time = activity.date;
-        form.init({ ...activity });
+        const {attendees, isGoing, isHost, host, ...values} = activity;
+        values.time = values.date;
+        form.init({ ...values });
       });
     } else {
       form.clear();

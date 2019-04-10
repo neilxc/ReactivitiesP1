@@ -10,22 +10,45 @@ import {
   ItemContent,
   ItemHeader,
   ItemDescription,
-  Icon
+  Icon,
+  Label
 } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import ActivityListItemAttendees from './ActivityListItemAttendees';
 
 export default observer(({ activity }) => (
   <SegmentGroup>
     <Segment>
       <ItemGroup>
         <Item>
-          <ItemImage size='tiny' circular src={'/assets/user.png'} />
+          <ItemImage
+            size='tiny'
+            circular
+            src={'/assets/user.png'}
+            style={{ marginBottom: 3 }}
+          />
           <ItemContent>
             <ItemHeader as={Link} to={`/activities/${activity.id}`}>
               {activity.title}
             </ItemHeader>
-            <ItemDescription>Hosted by Bob</ItemDescription>
+            <ItemDescription>
+              Hosted by {activity.host && activity.host.displayName}
+            </ItemDescription>
+            {activity.isHost && (
+              <ItemDescription>
+                <Label basic color='orange'>
+                  You are hosting this activity
+                </Label>
+              </ItemDescription>
+            )}
+            {activity.isGoing && !activity.isHost && (
+              <ItemDescription>
+                <Label basic color='green'>
+                  You are going to this activity
+                </Label>
+              </ItemDescription>
+            )}
           </ItemContent>
         </Item>
       </ItemGroup>
@@ -36,7 +59,9 @@ export default observer(({ activity }) => (
         <Icon name='marker' /> {activity.venue}, {activity.city}
       </span>
     </Segment>
-    <Segment secondary>Attendees go here</Segment>
+    <Segment secondary>
+      <ActivityListItemAttendees attendees={activity.attendees} />
+    </Segment>
     <Segment clearing>
       <span>{activity.description}</span>
       <Button

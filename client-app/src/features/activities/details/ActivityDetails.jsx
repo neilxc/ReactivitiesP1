@@ -17,21 +17,26 @@ class ActivityDetails extends Component {
 
   render() {
     const {
-      activityStore: { activity, loading }
+      activityStore: { activity, loading, loadingInitial, attendActivity, cancelAttendance }
     } = this.props;
-    if (loading)
+    if (loadingInitial)
       return (
         <LoadingComponent inverted={false} content={'Loading activity...'} />
       );
     return (
       <Grid>
         <GridColumn width={10}>
-          <ActivityDetailsHeader activity={activity} />
-          <ActivityDetailsInfo activity={activity}/>
+          <ActivityDetailsHeader
+            activity={activity}
+            attendActivity={attendActivity}
+            cancelAttendance={cancelAttendance}
+            loading={loading}
+          />
+          <ActivityDetailsInfo activity={activity} />
           <ActivityDetailsChat />
         </GridColumn>
         <GridColumn width={6}>
-          <ActivityDetailsSidebar />
+          <ActivityDetailsSidebar attendees={activity.attendees} />
         </GridColumn>
       </Grid>
     );
