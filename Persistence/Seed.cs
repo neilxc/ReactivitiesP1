@@ -18,18 +18,21 @@ namespace Persistence
                 {
                     new AppUser
                     {
+                        Id = "a",
                         DisplayName = "Bob",
                         UserName = "bob",
                         Email = "bob@test.com"
                     },
                     new AppUser
                     {
+                        Id = "b",
                         DisplayName = "Jane",
                         UserName = "jane",
                         Email = "jane@test.com"
                     },
                     new AppUser
                     {
+                        Id = "c",
                         DisplayName = "Tom",
                         UserName = "tom",
                         Email = "tom@test.com"
@@ -54,6 +57,14 @@ namespace Persistence
                         Category = "Drinks",
                         City = "London",
                         Venue = "Pub",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "a",
+                                IsHost = true,
+                            }
+                        }
                     },
                     new Activity
                     {
@@ -63,6 +74,19 @@ namespace Persistence
                         Category = "Culture",
                         City = "Paris",
                         Venue = "The Louvre",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "b",
+                                IsHost = true,
+                            },
+                            new UserActivity
+                            {
+                                AppUserId = "a",
+                                IsHost = false,
+                            },
+                        }
                     },
                     new Activity
                     {
@@ -72,6 +96,19 @@ namespace Persistence
                         Category = "Music",
                         City = "London",
                         Venue = "Wembly Stadium",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "b",
+                                IsHost = true,
+                            },
+                            new UserActivity
+                            {
+                                AppUserId = "a",
+                                IsHost = false,
+                            },
+                        }
                     },
                     new Activity
                     {
@@ -81,6 +118,19 @@ namespace Persistence
                         Category = "Food",
                         City = "London",
                         Venue = "Jamies Italian",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "c",
+                                IsHost = true,
+                            },
+                            new UserActivity
+                            {
+                                AppUserId = "a",
+                                IsHost = false,
+                            },
+                        }
                     },
                     new Activity
                     {
@@ -90,6 +140,19 @@ namespace Persistence
                         Category = "Drinks",
                         City = "London",
                         Venue = "Pub",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "b",
+                                IsHost = true,
+                            },
+                            new UserActivity
+                            {
+                                AppUserId = "c",
+                                IsHost = false,
+                            },
+                        }
                     },
                     new Activity
                     {
@@ -99,6 +162,14 @@ namespace Persistence
                         Category = "Culture",
                         City = "London",
                         Venue = "British Museum",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "a",
+                                IsHost = true,
+                            }
+                        }
                     },
                     new Activity
                     {
@@ -108,6 +179,19 @@ namespace Persistence
                         Category = "Drinks",
                         City = "London",
                         Venue = "Punch and Judy",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "c",
+                                IsHost = true,
+                            },
+                            new UserActivity
+                            {
+                                AppUserId = "b",
+                                IsHost = false,
+                            },
+                        }
                     },
                     new Activity
                     {
@@ -117,6 +201,19 @@ namespace Persistence
                         Category = "Music",
                         City = "London",
                         Venue = "O2 Arena",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "a",
+                                IsHost = true,
+                            },
+                            new UserActivity
+                            {
+                                AppUserId = "b",
+                                IsHost = false,
+                            },
+                        }
                     },
                     new Activity
                     {
@@ -126,6 +223,19 @@ namespace Persistence
                         Category = "Travel",
                         City = "Berlin",
                         Venue = "All",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "a",
+                                IsHost = true,
+                            },
+                            new UserActivity
+                            {
+                                AppUserId = "c",
+                                IsHost = false,
+                            },
+                        }
                     },
                     new Activity
                     {
@@ -135,6 +245,19 @@ namespace Persistence
                         Category = "Drinks",
                         City = "London",
                         Venue = "Pub",
+                        UserActivities = new List<UserActivity>
+                        {
+                            new UserActivity
+                            {
+                                AppUserId = "b",
+                                IsHost = true,
+                            },
+                            new UserActivity
+                            {
+                                AppUserId = "a",
+                                IsHost = false,
+                            },
+                        }
                     }
                 };
 
