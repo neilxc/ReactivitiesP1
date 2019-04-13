@@ -1,12 +1,28 @@
-import { observable, action, computed } from 'mobx';
+import { observable, action, computed, reaction } from 'mobx';
 import agent from '../api/agent';
 import userStore from './userStore';
 import photoWidgetStore from './photoWidgetStore';
 import { toast } from 'react-toastify';
 
 class ProfileStore {
+  constructor() {
+    reaction(
+      () => this.activeTab,
+      activeTab => {
+        if (activeTab !== 3 || activeTab !== 4) {
+          this.followings = [];
+        }
+        if (activeTab === 3 || activeTab === 4) {
+          const followers = activeTab === 3 ? true : false;
+          this.loadFollowings(followers);
+        }
+      }
+    )
+  }
+
   @observable profile = {};
   @observable loading = false;
+  @observable loadingProfile = false;
   @observable editPhotoMode = false;
   @observable uploadPhotoMode = false;
   @observable editProfileMode = false;
@@ -15,9 +31,53 @@ class ProfileStore {
   @observable updatingProfile = false;
   @observable deletingPhoto = false;
   @observable targetButton = null;
+  @observable activeTab = null;
+  @observable followings = [];
+  @observable loadingFollowings = false;
 
   @computed get isCurrentUser() {
     return userStore.user.username === this.profile.username;
+  }
+
+  @action setActiveTab = (e, data) => {
+    this.activeTab = data.activeIndex;
+  }
+
+  @action loadFollowings = (followers) => {
+    this.loadingFollowings = true;
+    agent.Profiles.listFollowings(this.profile.username, followers)
+      .then((followings) => {
+        this.followings = followings;
+        this.loadingFollowings = false;
+      })
+      .catch(err => {
+        toast.error('Problem loading followings')
+      })
+      .finally(() => this.loadingFollowings = false);
+  }
+
+  @action follow = username => {
+    this.loading = true;
+    agent.Profiles.follow(username)
+      .then(() => {
+        this.profile.following = true;
+      })
+      .catch(err => {
+        toast.error('problem following user')
+      })
+      .finally(() => this.loading = false);
+  }
+
+  @action unfollow = username => {
+    this.loading = true;
+    agent.Profiles.unfollow(username) 
+      .then(() => {
+        this.profile.following = false;
+      })
+      .catch(err => {
+        toast.error('problem with request')
+      })
+      .finally(() => this.loading = false)
   }
 
   @action toggleEditProfileMode = () => {
@@ -33,7 +93,7 @@ class ProfileStore {
   };
 
   @action loadProfile = username => {
-    this.loading = true;
+    this.loadingProfile = true;
     agent.Profiles.get(username)
       .then(profile => {
         this.profile = profile;
@@ -42,7 +102,7 @@ class ProfileStore {
         console.log(err);
       })
       .finally(() => {
-        this.loading = false;
+        this.loadingProfile = false;
       });
   };
 

@@ -18,22 +18,17 @@ namespace Application.Profiles
 
         public class Handler : IRequestHandler<Query, Profile>
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
+            private readonly IProfileReader _profileReader;
 
-            public Handler(DataContext context, IMapper mapper)
+            public Handler(IProfileReader profileReader)
             {
-                _context = context;
-                _mapper = mapper;
+                _profileReader = profileReader;
             }
 
             public async Task<Profile> Handle(Query request,
                 CancellationToken cancellationToken)
             {
-                var user = await _context.Users.SingleOrDefaultAsync(x =>
-                    x.UserName == request.Username);
-
-                return _mapper.Map<AppUser, Profile>(user);
+                return await _profileReader.ReadProfile(request.Username);
             }
         }
     }

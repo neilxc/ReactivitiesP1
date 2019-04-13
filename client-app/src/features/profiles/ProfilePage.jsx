@@ -14,8 +14,8 @@ class ProfilePage extends Component {
   }
 
   render() {
-      const {profileStore: {profile, loading}} = this.props;
-      if (loading) return <LoadingComponent content='Loading profile...' />
+      const {profileStore: {profile, loadingProfile }} = this.props;
+      if (loadingProfile) return <LoadingComponent content='Loading profile...' />
     return (
       <Grid>
         <Grid.Column width={16}>

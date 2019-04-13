@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Container } from 'semantic-ui-react';
 import NavBar from '../../features/nav/NavBar.jsx';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard.jsx';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, withRouter } from 'react-router-dom';
 import {ToastContainer} from "react-toastify";
 import HomePage from '../../features/home/HomePage.jsx';
 import ActivityForm from '../../features/activities/form/ActivityForm.jsx';
@@ -45,7 +45,7 @@ class App extends Component {
             <Fragment>
               <NavBar />
               <Container style={{ marginTop: '7em' }}>
-                <Switch>
+                <Switch key={this.props.location.key}>
                   <Route
                     exact
                     path='/activities'
@@ -66,4 +66,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withRouter(App);
