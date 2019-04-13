@@ -38,18 +38,17 @@ namespace Application.Photos
                     x.UserName == _userAccessor.GetCurrentUsername());
 
                 if (user.Photos.All(x => x.Id != request.Id))
-                    throw new RestException(HttpStatusCode.Forbidden, 
-                        new {Photo = "you are not allowed to delete this photo"});
+                    throw new RestException(HttpStatusCode.Forbidden,
+                        new { Photo = "you are not allowed to delete this photo" });
 
                 var photo = await _context.Photos.FindAsync(request.Id);
 
                 if (photo == null)
-                    throw new RestException(HttpStatusCode.NotFound, new {Photo = "not found"});
-                
-                if (photo.IsMain && user.Photos.Count > 1) {
-                    var otherPhoto = await _context.Photos.FirstOrDefaultAsync(x => 
-                        x.Id != request.Id);
-                    otherPhoto.IsMain = true;
+                    throw new RestException(HttpStatusCode.NotFound, new { Photo = "not found" });
+
+                if (photo.IsMain)
+                {
+                    throw new RestException(HttpStatusCode.BadRequest, new { Photo = "You cannot delete your main photo" });
                 }
 
                 user.Photos.Remove(photo);

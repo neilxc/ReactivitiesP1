@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
+using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -17,10 +19,12 @@ namespace Application.Profiles
         public class Handler : IRequestHandler<Query, Profile>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, IMapper mapper)
             {
                 _context = context;
+                _mapper = mapper;
             }
 
             public async Task<Profile> Handle(Query request,
@@ -29,13 +33,7 @@ namespace Application.Profiles
                 var user = await _context.Users.SingleOrDefaultAsync(x =>
                     x.UserName == request.Username);
 
-                return new Profile
-                {
-                    DisplayName = user.DisplayName,
-                    Username = user.UserName,
-                    Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
-                    Photos = user.Photos
-                };
+                return _mapper.Map<AppUser, Profile>(user);
             }
         }
     }

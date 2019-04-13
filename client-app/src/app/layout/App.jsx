@@ -9,10 +9,10 @@ import ActivityForm from '../../features/activities/form/ActivityForm.jsx';
 import ActivityDetails from '../../features/activities/details/ActivityDetails.jsx';
 import { NotFound } from '../common/errors/NotFound.jsx';
 import ErrorBoundary from '../common/errors/ErrorBoundary.jsx';
-import LoginForm from '../../features/user/LoginForm.jsx';
 import { inject, observer } from 'mobx-react';
 import LoadingComponent from './LoadingComponent.jsx';
 import ModalContainer from '../modals/ModalContainer.jsx';
+import ProfilePage from '../../features/profiles/ProfilePage.jsx';
 
 @inject('commonStore', 'userStore')
 @observer
@@ -54,7 +54,7 @@ class App extends Component {
                   <Route path='/activities/:id' component={ActivityDetails} />
                   <Route path='/manage/:id' component={ActivityForm} />
                   <Route path='/createActivity' component={ActivityForm} />
-                  <Route path='/login' component={LoginForm} />
+                  <Route path='/profiles/:username' component={ProfilePage} />
                   <Route component={NotFound} />
                 </Switch>
               </Container>

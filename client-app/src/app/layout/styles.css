@@ -41,3 +41,16 @@ body {
 }
 
 /*end home page styles*/
+
+/* dropzone styles */
+.dropzone {
+  border: dashed 3px #eee;
+  border-radius: 5px;
+  padding-top: 30px;
+  text-align: center;
+  /* min-height: 236px; */
+}
+
+.dropzone--isActive {
+  border: dashed 3px green;
+}

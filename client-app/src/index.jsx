@@ -14,6 +14,8 @@ import userStore from './app/stores/userStore';
 import commonStore from './app/stores/commonStore';
 import modalStore from './app/stores/modalStore';
 import dateFnsLocalizer from 'react-widgets-date-fns';
+import profileStore from './app/stores/profileStore';
+import photoWidgetStore from './app/stores/photoWidgetStore'
 
 dateFnsLocalizer()
 
@@ -25,7 +27,9 @@ const stores = {
   router: routingStore,
   userStore,
   commonStore,
-  modalStore
+  modalStore,
+  profileStore,
+  photoWidgetStore
 };
 
 const history = syncHistoryWithStore(browserHistory, routingStore);

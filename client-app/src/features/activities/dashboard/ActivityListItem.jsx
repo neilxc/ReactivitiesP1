@@ -25,7 +25,7 @@ export default observer(({ activity }) => (
           <ItemImage
             size='tiny'
             circular
-            src={'/assets/user.png'}
+            src={activity.host.image || '/assets/user.png'}
             style={{ marginBottom: 3 }}
           />
           <ItemContent>
@@ -33,7 +33,10 @@ export default observer(({ activity }) => (
               {activity.title}
             </ItemHeader>
             <ItemDescription>
-              Hosted by {activity.host && activity.host.displayName}
+              Hosted by{' '} 
+              <Link to={`profiles/${activity.host && activity.host.username}`}>
+               {activity.host && activity.host.displayName}
+              </Link>
             </ItemDescription>
             {activity.isHost && (
               <ItemDescription>
