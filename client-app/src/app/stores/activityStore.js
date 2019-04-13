@@ -4,6 +4,8 @@ import userStore from './userStore';
 import agent from '../api/agent';
 import { toast } from 'react-toastify';
 import { setActivityProps } from '../common/util/util';
+import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
+import commonStore from './commonStore';
 
 class ActivityStore {
   @observable activityRegistry = new Map();
@@ -12,6 +14,38 @@ class ActivityStore {
   @observable loading = false;
   @observable submitting = false;
   @observable targetButton = null;
+  @observable hubConnection = null;
+
+  @action createHubConnection() {
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl('https://localhost:5001/chat', {
+        accessTokenFactory: () => commonStore.token
+      })
+      .configureLogging(LogLevel.Information)
+      .build();
+
+    this.hubConnection
+      .start()
+      .then(() => console.log(this.hubConnection.id))
+      .catch(err => console.log('Error establishing connection: ', err));
+
+    this.hubConnection.on('ReceiveComment', comment => {
+      this.activity.comments.push(comment);
+    });
+  }
+
+  @action stopHubConnection = () => {
+    this.hubConnection.stop();
+  };
+
+  @action addComment = values => {
+    values.id = this.activity.id;
+    return this.hubConnection
+      .invoke('SendComment', values)
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
   @action loadActivities() {
     this.loadingInitial = true;
@@ -57,7 +91,9 @@ class ActivityStore {
         this.editMode = false;
       })
       .then(() => router.push('/activities'))
-      .catch((err) => toast.error(err.data.title ? err.data.title : 'Server error'))
+      .catch(err =>
+        toast.error(err.data.title ? err.data.title : 'Server error')
+      )
       .finally(() => (this.submitting = false));
   };
 
@@ -71,7 +107,9 @@ class ActivityStore {
         this.editMode = false;
       })
       .then(() => router.push(`/activities/${activity.id}`))
-      .catch((err) => toast.error(err.data.title ? err.data.title : 'Server error'))
+      .catch(err =>
+        toast.error(err.data.title ? err.data.title : 'Server error')
+      )
       .finally(() => (this.submitting = false));
   };
 
@@ -94,7 +132,7 @@ class ActivityStore {
       username: userStore.user.username,
       isHost: false,
       image: userStore.user.image
-    }
+    };
     this.loading = true;
     agent.Activities.attend(this.activity.id)
       .then(() => {
@@ -103,33 +141,36 @@ class ActivityStore {
         this.activityRegistry.set(this.activity.id, this.activity);
       })
       .catch(err => {
-        toast.error("problem adding attendance");
+        toast.error('problem adding attendance');
       })
       .finally(() => {
         this.loading = false;
-      })
-  }
+      });
+  };
 
   @action cancelAttendance = () => {
     const username = userStore.user.username;
     this.loading = true;
     agent.Activities.unattend(this.activity.id)
       .then(() => {
-        this.activity.attendees = this.activity.attendees.filter(a => a.username !== username);
+        this.activity.attendees = this.activity.attendees.filter(
+          a => a.username !== username
+        );
         this.activity.isGoing = false;
         this.activityRegistry.set(this.activity.id, this.activity);
       })
       .catch(err => {
-        toast.error("problem removing attendance");
+        toast.error('problem removing attendance');
       })
       .finally(() => {
         this.loading = false;
-      })
-
-  }
+      });
+  };
 
   @computed get activitiesByDate() {
-    return this.groupActivitiesByDate(Array.from(this.activityRegistry.values()));
+    return this.groupActivitiesByDate(
+      Array.from(this.activityRegistry.values())
+    );
   }
 
   groupActivitiesByDate(activities) {

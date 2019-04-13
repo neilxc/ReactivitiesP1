@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using API.Middleware;
+using API.SignalR;
 using Application.Activities;
 using Application.Interfaces;
 using AutoMapper;
@@ -52,7 +53,10 @@ namespace API
             services.AddCors(opt => opt.AddPolicy("CorsPolicy",
                 b =>
                 {
-                    b.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
+                    b.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins("http://localhost:3000")
+                    .AllowCredentials();
                 }
             ));
             var builder = services.AddIdentityCore<AppUser>();
@@ -62,8 +66,11 @@ namespace API
 
             services.AddAuthorization(opt =>
             {
-                opt.AddPolicy("IsActivityHost", policy => { policy.Requirements
-                    .Add(new IsHostRequirement()); });
+                opt.AddPolicy("IsActivityHost", policy =>
+                {
+                    policy.Requirements
+.Add(new IsHostRequirement());
+                });
             });
             services.AddTransient<IAuthorizationHandler, IsHostHandler>();
 
@@ -80,6 +87,20 @@ namespace API
                         ValidateIssuer = false,
                         ValidateAudience = false
                     };
+
+                    opt.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             services.AddScoped<IJwtGenerator, JwtGenerator>();
@@ -87,6 +108,7 @@ namespace API
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
             services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
 
+            services.AddSignalR();
             services.AddMvc(opt =>
                 {
                     var policy = new AuthorizationPolicyBuilder()
@@ -117,6 +139,10 @@ namespace API
             app.UseCors("CorsPolicy");
             app.UseHttpsRedirection();
             app.UseAuthentication();
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ChatHub>("/chat");
+            });
             app.UseMvc();
         }
     }

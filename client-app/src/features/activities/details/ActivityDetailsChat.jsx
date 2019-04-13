@@ -1,54 +1,51 @@
-import React, { Fragment } from "react";
-import { Button, Comment, Form, Header, Segment } from "semantic-ui-react";
+import React, { Fragment } from 'react';
+import { Link } from 'react-router-dom';
+import { Button, Comment, Form, Header, Segment } from 'semantic-ui-react';
+import TextAreaInput from '../../../app/forms/inputs/TextAreaInput';
+import { format } from 'url';
+import forms from '../../../app/forms/forms';
+import { observer } from 'mobx-react';
+import FormSubmitButton from '../../../app/forms/controls/FormSubmitButton';
 
-const ActivityDetailsChat = props => (
+const form = forms.commentForm;
+
+const ActivityDetailsChat = ({activity}) => (
   <Fragment>
     <Segment
-      textAlign="center"
-      attached="top"
+      textAlign='center'
+      attached='top'
       inverted
-      color="teal"
-      style={{ border: "none" }}
+      color='teal'
+      style={{ border: 'none' }}
     >
       <Header>Chat about this event</Header>
     </Segment>
-    <Segment attached>
+    <Segment attached clearing>
       <Comment.Group>
-        <Comment>
-          <Comment.Avatar src="/assets/user.png" />
-          <Comment.Content>
-            <Comment.Author as="a">Matt</Comment.Author>
-            <Comment.Metadata>
-              <div>Today at 5:42PM</div>
-            </Comment.Metadata>
-            <Comment.Text>How artistic!</Comment.Text>
-            <Comment.Actions>
-              <Comment.Action>Reply</Comment.Action>
-            </Comment.Actions>
-          </Comment.Content>
-        </Comment>
+        {activity.comments &&
+          activity.comments.map(comment => (
+            <Comment key={comment.id}>
+              <Comment.Avatar src={comment.image || '/assets/user.png'} />
+              <Comment.Content>
+                <Comment.Author as={Link} to={`/profiles/${comment.username}`}>
+                  {comment.displayName}
+                </Comment.Author>
+                <Comment.Metadata>
+                  <div>{comment.createdAt}</div>
+                </Comment.Metadata>
+                <Comment.Text>{comment.body}</Comment.Text>
+              </Comment.Content>
+            </Comment>
+          ))}
 
-        <Comment>
-          <Comment.Avatar src="/assets/user.png" />
-          <Comment.Content>
-            <Comment.Author as="a">Joe Henderson</Comment.Author>
-            <Comment.Metadata>
-              <div>5 days ago</div>
-            </Comment.Metadata>
-            <Comment.Text>Dude, this is awesome. Thanks so much</Comment.Text>
-            <Comment.Actions>
-              <Comment.Action>Reply</Comment.Action>
-            </Comment.Actions>
-          </Comment.Content>
-        </Comment>
-
-        <Form reply>
-          <Form.TextArea />
-          <Button
-            content="Add Reply"
-            labelPosition="left"
-            icon="edit"
-            primary
+        <Form style={{marginTop: 5}}>
+            <TextAreaInput field={form.$('body')} rows={2} />
+          <FormSubmitButton
+            content='Add Reply'
+            form={form}
+            positive={true}
+            floated='right'
+            icon='edit'
           />
         </Form>
       </Comment.Group>
@@ -56,4 +53,4 @@ const ActivityDetailsChat = props => (
   </Fragment>
 );
 
-export default ActivityDetailsChat;
+export default observer(ActivityDetailsChat);
