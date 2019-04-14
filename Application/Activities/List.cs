@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -11,9 +12,24 @@ namespace Application.Activities
 {
     public class List
     {
-        public class Query : IRequest<List<ActivityDto>>{}
+        public class ActivitiesEnvelope
+        {
+            public List<ActivityDto> Activities { get; set; }
+            public int ActivityCount { get; set; }
+        }
+        public class Query : IRequest<ActivitiesEnvelope>
+        {
+            public Query(int? limit, int? offset)
+            {
+                Offset = offset;
+                Limit = limit;
+            }
 
-        public class Handler : IRequestHandler<Query, List<ActivityDto>>
+            public int? Limit { get; set; }
+            public int? Offset { get; set; }
+        }
+
+        public class Handler : IRequestHandler<Query, ActivitiesEnvelope>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -24,12 +40,22 @@ namespace Application.Activities
                 _mapper = mapper;
             }
 
-            public async Task<List<ActivityDto>> Handle(Query request, 
+            public async Task<ActivitiesEnvelope> Handle(Query request, 
                 CancellationToken cancellationToken)
             {
-                var activities = await _context.Activities.ToListAsync();
+                var queryable = _context.Activities.AsQueryable();
 
-                return _mapper.Map<List<Activity>, List<ActivityDto>>(activities);
+                var activities = await queryable
+                    .Skip(request.Offset ?? 0)
+                    .Take(request.Limit ?? 3).ToListAsync();
+
+                var activitiesToReturn = _mapper.Map<List<Activity>, List<ActivityDto>>(activities);
+
+                return new ActivitiesEnvelope
+                {
+                    Activities = activitiesToReturn,
+                    ActivityCount = queryable.Count()
+                };
             }
         }
     }
