@@ -14,6 +14,7 @@ class UserStore {
         return agent.User.login(values.email, values.password)
             .then((user) => {
                 commonStore.setToken(user.token);
+                console.log(user.token);
                 this.user = user;
             })
             .catch(err => {

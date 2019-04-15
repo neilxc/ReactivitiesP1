@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace Application.Activities
 {
     public class AttendeeDto
@@ -6,5 +8,8 @@ namespace Application.Activities
         public string DisplayName { get; set; }
         public string Image { get; set; }
         public bool IsHost { get; set; }
+
+        [JsonProperty("following")]
+        public bool IsFollowed { get; set; }
     }
 }

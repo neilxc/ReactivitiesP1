@@ -17,7 +17,7 @@ class ProfileStore {
           this.loadFollowings(followers);
         }
       }
-    )
+    );
   }
 
   @observable profile = {};
@@ -34,6 +34,8 @@ class ProfileStore {
   @observable activeTab = null;
   @observable followings = [];
   @observable loadingFollowings = false;
+  @observable userActivities = [];
+  @observable loadingActivities = false;
 
   @computed get isCurrentUser() {
     return userStore.user.username === this.profile.username;
@@ -41,20 +43,60 @@ class ProfileStore {
 
   @action setActiveTab = (e, data) => {
     this.activeTab = data.activeIndex;
-  }
+  };
 
-  @action loadFollowings = (followers) => {
+  @action loadUserActivities = (e, { activeIndex }, username) => {
+    this.loadingActivities = true;
+    switch (activeIndex) {
+      case 1: // past
+        agent.UserActivities.past(username)
+          .then(activities => {
+            this.userActivities = activities;
+            this.loadingActivities = false;
+          })
+          .catch(err => {
+            toast.error('Problem loading activities');
+            this.loadingActivities = false;
+          });
+        break;
+      case 2: // hosting
+        agent.UserActivities.hosting(username)
+          .then(activities => {
+            this.userActivities = activities;
+            this.loadingActivities = false;
+          })
+          .catch(err => {
+            toast.error('Problem loading activities');
+            this.loadingActivities = false;
+          });
+        break;
+      default:
+        // future
+        agent.UserActivities.future(username)
+          .then(activities => {
+            this.userActivities = activities;
+            this.loadingActivities = false;
+          })
+          .catch(err => {
+            toast.error('Problem loading activities');
+            this.loadingActivities = false;
+          });
+        break;
+    }
+  };
+
+  @action loadFollowings = followers => {
     this.loadingFollowings = true;
     agent.Profiles.listFollowings(this.profile.username, followers)
-      .then((followings) => {
+      .then(followings => {
         this.followings = followings;
         this.loadingFollowings = false;
       })
       .catch(err => {
-        toast.error('Problem loading followings')
+        toast.error('Problem loading followings');
       })
-      .finally(() => this.loadingFollowings = false);
-  }
+      .finally(() => (this.loadingFollowings = false));
+  };
 
   @action follow = username => {
     this.loading = true;
@@ -63,26 +105,26 @@ class ProfileStore {
         this.profile.following = true;
       })
       .catch(err => {
-        toast.error('problem following user')
+        toast.error('problem following user');
       })
-      .finally(() => this.loading = false);
-  }
+      .finally(() => (this.loading = false));
+  };
 
   @action unfollow = username => {
     this.loading = true;
-    agent.Profiles.unfollow(username) 
+    agent.Profiles.unfollow(username)
       .then(() => {
         this.profile.following = false;
       })
       .catch(err => {
-        toast.error('problem with request')
+        toast.error('problem with request');
       })
-      .finally(() => this.loading = false)
-  }
+      .finally(() => (this.loading = false));
+  };
 
   @action toggleEditProfileMode = () => {
     this.editProfileMode = !this.editProfileMode;
-  }
+  };
 
   @action toggleEditPhotoMode = () => {
     this.editPhotoMode = !this.editPhotoMode;
@@ -109,24 +151,24 @@ class ProfileStore {
   @action updateProfile = values => {
     this.updatingProfile = true;
     agent.Profiles.updateProfile(values)
-      .then((profile) => {
+      .then(profile => {
         if (values.displayName !== userStore.user.displayName)
           userStore.user.displayName = values.displayName;
         this.profile = profile;
       })
       .catch(err => {
-        toast.error('Error updating profile')
+        toast.error('Error updating profile');
       })
       .finally(() => {
         this.updatingProfile = false;
         this.editProfileMode = false;
-      })
-  }
+      });
+  };
 
   @action uploadPhoto = () => {
     this.uploadingPhoto = true;
     agent.Profiles.uploadPhoto(photoWidgetStore.croppedImage)
-      .then((photo) => {
+      .then(photo => {
         this.profile.photos.push(photo);
         if (photo.isMain) {
           userStore.user.image = photo.url;
@@ -142,7 +184,7 @@ class ProfileStore {
         this.uploadingPhoto = false;
         photoWidgetStore.clearImages();
       });
-  }
+  };
 
   @action setMainPhoto = (photo, e) => {
     this.loadingSetMain = true;
@@ -155,20 +197,22 @@ class ProfileStore {
         this.profile.image = photo.url;
       })
       .catch(err => {
-        toast.error('Problem setting photo as main')
+        toast.error('Problem setting photo as main');
       })
       .finally(() => {
         this.loadingSetMain = false;
         this.targetButton = null;
-      })
-  }
+      });
+  };
 
   @action deletePhoto = (photo, e) => {
     this.targetButton = e.target.name;
     this.deletingPhoto = true;
     agent.Profiles.deletePhoto(photo.id)
       .then(() => {
-        this.profile.photos = this.profile.photos.filter(a => a.id !== photo.id);
+        this.profile.photos = this.profile.photos.filter(
+          a => a.id !== photo.id
+        );
         if (photo.isMain) {
           userStore.user.image = null;
           this.profile.image = null;
@@ -180,8 +224,8 @@ class ProfileStore {
       .finally(() => {
         this.deletingPhoto = false;
         this.targetButton = null;
-      })
-  }
+      });
+  };
 }
 
 export default new ProfileStore();

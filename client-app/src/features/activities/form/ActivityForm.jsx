@@ -27,21 +27,20 @@ class ActivityForm extends Component {
   componentDidMount() {
     const { match, activityStore } = this.props;
     if (Object.keys(match.params).length !== 0) {
-      console.log('trying to load activity');
       activityStore.loadActivity(+match.params.id, true).then(activity => {
-        const {attendees, isGoing, isHost, host, ...values} = activity;
+        const {attendees, isGoing, isHost, host, comments, ...values} = activity;
         values.time = values.date;
         form.init({ ...values });
       });
     } else {
-      form.clear();
+      form.init();
     }
   }
 
   componentDidUpdate(oldProps) {
     const { location } = this.props;
     if (location.key !== oldProps.location.key) {
-      form.clear();
+      form.init();
     }
   }
 
@@ -75,7 +74,7 @@ class ActivityForm extends Component {
               </FormGroup>
               <TextInput field={form.$('city')} />
               <TextInput field={form.$('venue')} />
-              {activity && (
+              {form.has('id') && (
                 <Button
                   type='button'
                   name='delete'

@@ -56,7 +56,7 @@ namespace API
                 {
                     b.AllowAnyMethod()
                     .AllowAnyHeader()
-                    .WithOrigins("http://localhost:3000")
+                    .WithOrigins("http://localhost:3000", "https://localhost:3000")
                     .AllowCredentials();
                 }
             ));
@@ -84,8 +84,10 @@ namespace API
                     {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = key,
+                        ValidateLifetime = true,
                         ValidateIssuer = false,
-                        ValidateAudience = false
+                        ValidateAudience = false,
+                        ClockSkew = TimeSpan.Zero
                     };
 
                     opt.Events = new JwtBearerEvents

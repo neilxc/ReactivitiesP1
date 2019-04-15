@@ -2,6 +2,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { routingStore as router } from '../../index';
 import commonStore from '../stores/commonStore';
+import activityStore from '../stores/activityStore';
+import userStore from '../stores/userStore';
 
 axios.defaults.baseURL = 'https://localhost:5001/api';
 
@@ -17,6 +19,13 @@ axios.interceptors.request.use(
 );
 
 axios.interceptors.response.use(undefined, error => {
+  if (!error.status) {
+    alert('Server network error - check dotnet run and the console')
+  }
+  if (error.response.status === 401 && error.response.data === "") {
+    userStore.logout();
+    toast.info('Your session has expired, please login again');
+  }
   if (error.response.status === 404) {
     toast.error('Resource could not be found');
     router.push('/activities');
@@ -34,29 +43,25 @@ axios.interceptors.response.use(undefined, error => {
 
 const responseBody = res => res.data;
 
-const sleep = ms => x =>
-  new Promise(resolve => setTimeout(() => resolve(x), ms));
+// const sleep = ms => x =>
+//   new Promise(resolve => setTimeout(() => resolve(x), ms));
 
 const requests = {
   get: url =>
     axios
       .get(url)
-      .then(sleep(1000))
       .then(responseBody),
   post: (url, body) =>
     axios
       .post(url, body)
-      .then(sleep(1000))
       .then(responseBody),
   put: (url, body) =>
     axios
       .put(url, body)
-      .then(sleep(1000))
       .then(responseBody),
   del: url =>
     axios
       .delete(url)
-      .then(sleep(1000))
       .then(responseBody),
   form: (url, file) => {
     let formData = new FormData();
@@ -70,7 +75,10 @@ const requests = {
 };
 
 const Activities = {
-  list: () => requests.get(`/activities`),
+  list: () =>
+    axios
+      .get(`/activities`, { params: activityStore.axiosParams })
+      .then(responseBody),
   get: id => requests.get(`/activities/${id}`),
   create: activity => requests.post(`/activities`, activity),
   update: activity => requests.put(`/activities/${activity.id}`, activity),
@@ -97,8 +105,15 @@ const Profiles = {
   unfollow: username => requests.del(`/profiles/${username}/follow`)
 };
 
+const UserActivities = {
+  past: (username) => requests.get(`/profiles/${username}/activities?past=true`),
+  future: (username) => requests.get(`/profiles/${username}/activities?future=true`),
+  hosting: (username) => requests.get(`/profiles/${username}/activities?hosting=true`)
+}
+
 export default {
   Activities,
   User,
-  Profiles
+  Profiles,
+  UserActivities
 };

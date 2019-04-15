@@ -1,4 +1,4 @@
-import { observable, action, computed } from 'mobx';
+import { observable, action, computed, reaction } from 'mobx';
 import { routingStore as router } from '../../index';
 import userStore from './userStore';
 import agent from '../api/agent';
@@ -7,7 +7,20 @@ import { setActivityProps } from '../common/util/util';
 import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
 import commonStore from './commonStore';
 
+const LIMIT = 3;
+
 class ActivityStore {
+  constructor() {
+    reaction(
+      () => Object.values(this.predicate),
+      predicate => {
+        this.page = 0;
+        this.activityRegistry.clear();
+        this.loadActivities();
+      }
+    )
+  }
+
   @observable activityRegistry = new Map();
   @observable activity = null;
   @observable loadingInitial = false;
@@ -15,6 +28,45 @@ class ActivityStore {
   @observable submitting = false;
   @observable targetButton = null;
   @observable hubConnection = null;
+  @observable activityCount = 0;
+  @observable page = 0;
+  @observable predicate = {};
+
+  @computed get totalPages() {
+    return Math.ceil(this.activityCount / LIMIT);
+  }
+
+  @computed get axiosParams() {
+    const params = new URLSearchParams();
+    params.append('limit', LIMIT);
+    params.append('offset', `${this.page ? this.page * LIMIT : 0}`);
+    this.predicate.isGoing && params.append('isGoing', true);
+    this.predicate.isHost && params.append('isHost', true);
+    this.predicate.startDate && params.append('startDate', this.predicate.startDate.toISOString());
+    return params;
+  }
+
+  @action setDatePredicate = (date) => {
+    this.predicate.startDate = date;
+  }
+
+  @action setPredicate = (e, {name}) => {
+    switch(name) {
+      case 'isGoing':
+        this.predicate[name] = this.predicate[name] ? null : true;
+        break;
+      case 'isHost':
+        this.predicate[name] = this.predicate[name] ? null : true;
+        break;
+      default:
+        this.predicate = {}
+        break;
+    }
+  }
+
+  @action setPage = (page) => {
+    this.page = page;
+  }
 
   @action createHubConnection() {
     this.hubConnection = new HubConnectionBuilder()
@@ -47,16 +99,22 @@ class ActivityStore {
       });
   };
 
-  @action loadActivities() {
+  @action loadActivities = async () => {
     this.loadingInitial = true;
-    agent.Activities.list()
-      .then(activities => {
-        activities.forEach(activity => {
-          setActivityProps(activity, userStore.user);
-          this.activityRegistry.set(activity.id, activity);
-        });
-      })
-      .finally(() => (this.loadingInitial = false));
+    try {
+      const activityEnvelope = await agent.Activities.list()
+      const {activities, activityCount} = activityEnvelope;
+      activities.forEach(activity => {
+        setActivityProps(activity, userStore.user);
+        this.activityRegistry.set(activity.id, activity);
+      });
+      this.activityCount = activityCount;
+      this.loadingInitial = false;
+    } catch (err) {
+      console.log(err);
+      toast.error('Problem loading activities');
+      this.loadingInitial = false;
+    }
   }
 
   @action loadActivity = (id, acceptCached) => {
@@ -86,11 +144,13 @@ class ActivityStore {
     this.submitting = true;
     return agent.Activities.create(activity)
       .then(createdActivity => {
-        createdActivity.date = new Date(createdActivity.date);
+        setActivityProps(createdActivity, userStore.user);
         this.activityRegistry.set(createdActivity.id, createdActivity);
         this.editMode = false;
       })
-      .then(() => router.push('/activities'))
+      .then((createdActivity) => {
+        router.push('/activities');
+      })
       .catch(err =>
         toast.error(err.data.title ? err.data.title : 'Server error')
       )
@@ -101,7 +161,7 @@ class ActivityStore {
     this.submitting = true;
     agent.Activities.update(activity)
       .then(updatedActivity => {
-        updatedActivity.date = new Date(updatedActivity.date);
+        setActivityProps(updatedActivity, userStore.user);
         this.activityRegistry.set(updatedActivity.id, updatedActivity);
         this.activity = updatedActivity;
         this.editMode = false;

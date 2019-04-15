@@ -13,6 +13,7 @@ import { inject, observer } from 'mobx-react';
 import LoadingComponent from './LoadingComponent.jsx';
 import ModalContainer from '../modals/ModalContainer.jsx';
 import ProfilePage from '../../features/profiles/ProfilePage.jsx';
+import PrivateRoute from './PrivateRoute.jsx';
 
 @inject('commonStore', 'userStore')
 @observer
@@ -46,16 +47,16 @@ class App extends Component {
               <NavBar />
               <Container style={{ marginTop: '7em' }}>
                 <Switch key={this.props.location.key}>
-                  <Route
+                  <PrivateRoute
                     exact
                     path='/activities'
                     component={ActivityDashboard}
                   />
-                  <Route path='/activities/:id' component={ActivityDetails} />
-                  <Route path='/manage/:id' component={ActivityForm} />
-                  <Route path='/createActivity' component={ActivityForm} />
-                  <Route path='/profiles/:username' component={ProfilePage} />
-                  <Route component={NotFound} />
+                  <PrivateRoute path='/activities/:id' component={ActivityDetails} />
+                  <PrivateRoute path='/manage/:id' component={ActivityForm} />
+                  <PrivateRoute path='/createActivity' component={ActivityForm} />
+                  <PrivateRoute path='/profiles/:username' component={ProfilePage} />
+                  <PrivateRoute component={NotFound} />
                 </Switch>
               </Container>
             </Fragment>
